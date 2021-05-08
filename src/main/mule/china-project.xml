@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3c6d9176-47de-4d0f-b3af-8ebbd5b2751a" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<api-gateway:autodiscovery apiId="16843737" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="6dba2c03-5327-4cd7-b51a-46c10caf1f5d" flowRef="event-sources(Main-flow)" />
+	<flow name="event-sources(Main-flow)" doc:id="cd3fe2cd-8ac9-4333-9a8c-b1564564b3a1" >
+		<http:listener doc:name="Listener" doc:id="04bbe4c9-8210-4ca1-a0c8-bef1d86cc75f" config-ref="HTTP_Listener_config" path="/china"/>
+		<logger level="INFO" doc:name="flow start-log" doc:id="69de61a7-df18-4767-80ea-fab6f3e24df2" message="flow start-log"/>
+		<set-variable value="MainFlow variable" doc:name="MainFlow variable" doc:id="7708252a-6af8-4b71-8782-039a1b56132e" variableName="MainVar"/>
+		<set-payload value="flow-payload" doc:name="flow-payload" doc:id="b101473c-0395-452d-b62c-89dfd4bb02b3" />
+		<async doc:name="Async" doc:id="fa8c949b-bed6-41e9-b792-89313a5cef7b" >
+			<flow-ref doc:name="private_Flow" doc:id="b2d84248-a1c7-4352-9c5c-80771032d601" name="private_Flow" />
+		</async>
+		<flow-ref doc:name="Flow Reference" doc:id="72ed32e5-d9e5-4983-8f3d-6d341121f6a2" name="private_Flow"/>
+		<logger level="INFO" doc:name="flow-end-log and Sub-Flow payload: " doc:id="2cb4072b-5200-4c9e-a518-9d558371ad13" message='flow-end-log and Sub-Flow payload: #[payload] Subflow variable:#[vars."Sub-FlowVar"]'/>
+		<set-payload value="Hello-bele-From main flow" doc:name="Set Payload" doc:id="cf830d49-c412-49ce-a1b2-f5de0efff071" />
+	</flow>
+	<sub-flow name="Sub_Flow" doc:id="118ce673-668d-43c2-afea-487c648e24fd" >
+		<try doc:name="Try" doc:id="07789614-d17c-4dad-b528-1ee5c25d0f2f" >
+			<logger level="INFO" doc:name="sub-flowl-star log" doc:id="24eed6c7-bd2c-4351-9379-7c70ec45eaed" message="sub-flowl-star log-#[payload]" />
+		</try>
+		<set-variable value="Sub-Flow-variable" doc:name="Sub-Flow-variable" doc:id="74a0f3df-ac09-46d3-afd5-5eabd11e1c85" variableName="Sub-FlowVar"/>
+		<logger level="INFO" doc:name="subflow-end-log and main-flow " doc:id="6f85c838-24fe-4783-b7af-9eb70ac3e13c" message="subflow-end-log and main-flow is :#[vars.MainVar]"/>
+		<set-payload value="good morning Bele-From subFlow" doc:name="Sub-flow-payload" doc:id="e1a42824-e641-4c04-9233-849bcc41d35f" />
+	</sub-flow>
+	<flow name="Transform-china" doc:id="2b9bbfe5-d1e8-4f96-afe5-464766078dc1" >
+		<http:listener doc:name="Listener" doc:id="23a18e91-e877-4acb-8c7c-9942b3d06acb" config-ref="HTTP_Listener_config" path="/test"/>
+		<ee:transform doc:name="Transform Message" doc:id="0e85d3c8-98aa-4b81-a6db-fc96be6cd192" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="private_Flow" doc:id="f3cb7a65-c5fa-46cc-9009-d39183f5b240" >
+		<logger level="INFO" doc:name="Logger" doc:id="96848d72-9205-4eca-ace8-8be8dfad8b14" message="private-Flow start log"/>
+	</flow>
+</mule>
